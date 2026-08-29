@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --paper: #faf8f4;
+  --ink: #1a1b1e;
+  --ink-soft: #6b6a66;
+  --accent: #b8863b;
+  --accent-foreground: #1a1b1e;
+  --line: #e8e4db;
+  --muted: #f2efe8;
+  --success: #3d8361;
+  --danger: #b8503d;
+  --pending: #9a9591;
+}
+
+.dark {
+  --paper: #1a1b1e;
+  --ink: #f4f2ee;
+  --ink-soft: #a3a19b;
+  --accent: #d4a05c;
+  --accent-foreground: #1a1b1e;
+  --line: #2e2f35;
+  --muted: #232428;
+  --success: #4ea37b;
+  --danger: #d4715a;
+  --pending: #6b6a66;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-pending: var(--pending);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-display);
+  }
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+}

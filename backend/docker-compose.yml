@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: gitbrain
+      POSTGRES_PASSWORD: gitbrain
+      POSTGRES_DB: gitbrain
+    ports:
+      - "5432:5432"
+    volumes:
+      - gitbrain_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gitbrain"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://gitbrain:gitbrain@postgres:5432/gitbrain
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build: .
+    env_file: .env
+    environment:
+      # sync driver -- see app/db/sync_session.py for why workers don't share the
+      # API's async engine
+      DATABASE_URL: postgresql+asyncpg://gitbrain:gitbrain@postgres:5432/gitbrain
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./workers:/app/workers
+      - gitbrain_repos_data:/data/repos
+    command: celery -A workers.celery_app worker --loglevel=info --queues=ingestion
+
+volumes:
+  gitbrain_pgdata:
+  gitbrain_repos_data:
