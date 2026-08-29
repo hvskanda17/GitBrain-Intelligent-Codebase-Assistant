@@ -1,224 +1,237 @@
-Temple Charity Website — Sri Balaganapathi Seva Mandali
+# GitBrain — Intelligent Codebase Assistant
 
-A secure full-stack temple donation management system built for Sri Balaganapathi Seva Mandali, allowing devotees to register, authenticate, and make online donations while providing administrators with secure management capabilities.
+GitBrain is an AI-powered codebase assistant that helps developers understand and interact with software repositories using natural-language conversations.
 
-Features
-🔐 JWT Authentication — Secure user registration and login with role-based access.
-👤 User & Donor Management — Manage donor profiles and enforce donor ownership.
-💰 Donation Management — Authenticated users can create donations securely.
-💳 Razorpay Integration — Payment order creation, signature verification, and webhook support.
-🛕 Temple Information — Public access to events, seva offerings, and gallery.
-👨‍💼 Admin Dashboard — Protected administrative APIs for managing donors, donations, and temple data.
-🗄️ PostgreSQL Database — Reliable relational data storage with JPA/Hibernate.
-🔄 Flyway Migrations — Version-controlled and consistent database schema management.
-🌐 Responsive React Frontend — Modern interface connected to the Spring Boot REST APIs.
-🛡️ Centralized Error Handling — Proper handling of validation, authentication, authorization, and database errors.
-Tech Stack
-Frontend
-React
-TypeScript
-Vite
-HTML5
-CSS3
-Backend
-Java
-Spring Boot 3
-Spring Security
-JWT
-Spring Data JPA
-Hibernate
-Maven
-Database & Infrastructure
-PostgreSQL 16
-Flyway
-Docker
-Payments
-Razorpay
-Architecture
-┌──────────────────────┐
-│      React/Vite      │
-│      Frontend        │
-└──────────┬───────────┘
-           │ REST API
-           │ /api/*
-           ▼
-┌──────────────────────┐
-│    Spring Boot       │
-│      Backend         │
-├──────────────────────┤
-│ Spring Security      │
-│ JWT Authentication   │
-│ REST Controllers     │
-│ Services             │
-│ JPA / Hibernate      │
-└───────┬───────┬──────┘
-        │       │
-        ▼       ▼
-┌────────────┐ ┌────────────┐
-│ PostgreSQL │ │  Razorpay  │
-│  Database  │ │  Payments  │
-└────────────┘ └────────────┘
-Authentication & Authorization
+It indexes repository source code, retrieves relevant code context, and uses an LLM to generate repository-aware answers with source references.
 
-The application uses JWT-based authentication with two primary roles:
+## Features
 
-Role	Access
-ROLE_USER	Login, profile/donor-owned donation operations
-ROLE_ADMIN	Donor management, donation management, administrative operations
+- JWT Authentication — Secure user registration, login, access tokens, and protected API endpoints.
+- Project & Repository Management — Create projects and associate repositories for analysis.
+- Code Indexing & Retrieval — Index repository files, functions, and classes for code-aware search.
+- AI Codebase Chat — Ask natural-language questions about an indexed repository.
+- RAG Pipeline — Retrieve relevant code context before generating AI responses.
+- SSE Streaming — Stream AI responses to the frontend in real time.
+- Chat Sessions — Create, rename, pin, delete, and manage repository-specific conversations.
+- Source References — Display the code sources used to generate responses.
+- Mock AI Provider — Run and test the chat functionality locally without an external LLM API.
+- PostgreSQL — Persistent storage for users, projects, repositories, indexed code, and chat history.
+- Redis — Support for caching and background application workflows.
+- Docker — Containerized development environment for the application services.
 
-Public endpoints such as temple events, seva offerings, gallery, and health status do not require authentication.
+## Tech Stack
 
-Administrative endpoints are protected using Spring Security and method-level authorization.
+### Frontend
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
 
-API Overview
-Public APIs
-GET  /api/health
-GET  /api/events
-GET  /api/seva-offerings
-GET  /api/gallery
-Authentication
-POST /api/auth/register
-POST /api/auth/login
-Donors
-GET    /api/donors
-POST   /api/donors
-PUT    /api/donors/{id}
-DELETE /api/donors/{id}
-Donations
-POST   /api/donations
-GET    /api/donations
-GET    /api/donations/{id}
-PUT    /api/donations/{id}
-DELETE /api/donations/{id}
-Payments
-POST /api/payments/orders
-POST /api/payments/verify
-POST /api/payments/webhook
-Admin
-GET /api/admin/dashboard
-Database
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Redis
+- JWT Authentication
 
-PostgreSQL runs through Docker.
+### AI & Search
+- RAG (Retrieval-Augmented Generation)
+- LLM integration
+- Code indexing
+- Full-text code search
+- SSE (Server-Sent Events) streaming
 
-Default development configuration:
+### Development
+- Docker
+- Docker Compose
+- Git
 
-Host: localhost
-Port: 5433
-Database: sribalaganapathi_v2
+## Architecture
 
-Flyway manages database migrations and keeps the application schema synchronized.
+GitBrain follows a repository-aware RAG architecture:
 
-Environment Variables
+User
+  ↓
+Next.js Frontend
+  ↓
+FastAPI Backend
+  ↓
+Chat Orchestrator
+  ↓
+Repository Retrieval
+  ↓
+Relevant Code Context
+  ↓
+LLM / Mock LLM
+  ↓
+SSE Stream
+  ↓
+Frontend Chat Interface
 
-Create a .env file based on .env.example.
+## How It Works
 
-Example:
+1. A user creates a project and adds a repository.
+2. GitBrain indexes the repository and extracts useful code information such as files, functions, and classes.
+3. The user opens the repository's Chat interface.
+4. The user asks a natural-language question.
+5. GitBrain searches the indexed repository for relevant code.
+6. The retrieved context is provided to the LLM.
+7. The generated response is streamed back to the frontend using Server-Sent Events (SSE).
+8. The conversation and response sources are persisted in PostgreSQL.
 
-DB_HOST=localhost
-DB_PORT=5433
-DB_NAME=sribalaganapathi_v2
-DB_USER=temple_app
-DB_PASSWORD=your_database_password
+## RAG
 
-JWT_SECRET=your_strong_jwt_secret
-JWT_EXPIRATION=3600000
+GitBrain uses Retrieval-Augmented Generation (RAG) to make AI responses aware of the repository being analyzed.
 
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=your_admin_password
+Instead of asking the LLM to answer only from its general knowledge, GitBrain first retrieves relevant code from the repository and provides that context to the model.
 
-RAZORPAY_KEY_ID=your_test_key_id
-RAZORPAY_KEY_SECRET=your_test_key_secret
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
+This allows users to ask questions such as:
 
-Never commit .env or real credentials to GitHub.
+- "How does authentication work?"
+- "Where is the database connection configured?"
+- "Explain this function."
+- "How are repositories indexed?"
+- "Where is JWT validation implemented?"
 
-Running the Project
-1. Start PostgreSQL
+## SSE Streaming
 
-From the project root:
+GitBrain uses Server-Sent Events (SSE) to stream assistant responses from the backend to the frontend.
 
+This allows the response to appear progressively instead of waiting for the entire AI response to finish.
+
+## Redis
+
+Redis is used as an infrastructure component for fast in-memory operations and application workflows. It can support caching and background processing as the project grows.
+
+## Local Development
+
+### Prerequisites
+
+- Node.js
+- Python
+- Docker Desktop
+- PostgreSQL
+- Redis
+
+### Start Backend
+
+```bash
+cd backend
 docker compose up -d
 
-Verify the database container:
-
-docker ps
-2. Start Backend
-cd backend
-mvn spring-boot:run
-
-Backend runs on:
-
-http://localhost:8080
-3. Start Frontend
-
-Open another terminal:
-
+Start Frontend
 cd frontend
 npm install
 npm run dev
 
-Frontend normally runs on:
+The frontend runs on:
 
-http://localhost:5173
-Verification
+http://localhost:3000
 
-The backend has been verified for:
+The backend runs on:
 
-Health endpoint — 200 OK
-Public events API — 200 OK
-Public seva API — 200 OK
-Public gallery API — 200 OK
-User registration — 201 Created
-Duplicate registration — 409 Conflict
-Valid user login — 200 OK
-Invalid credentials — 401 Unauthorized
-Unauthorized admin access — 403 Forbidden
-Admin authentication and protected access
-PostgreSQL connectivity
-Flyway migration validation
-Spring Boot startup
-JWT role handling
+http://localhost:8000
+
+Environment Configuration
+
+Create the required environment configuration for the backend.
+
+Example:
+APP_NAME=GitBrain
+ENVIRONMENT=development
+DEBUG=true
+
+DATABASE_URL=postgresql+asyncpg://gitbrain:gitbrain@localhost:5432/gitbrain
+REDIS_URL=redis://localhost:6379/0
+
+JWT_SECRET_KEY=change-me-in-production
+JWT_ALGORITHM=HS256
+
+CORS_ORIGINS=["http://localhost:3000"]
+
+LLM_PROVIDER=mock
+LLM_API_KEY=
+LLM_API_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-4o-mini
+
+For local development, LLM_PROVIDER=mock can be used to test the complete chat flow without consuming an external LLM API.
+
 Project Structure
-SriBalaganapathiV2/
-│
+GitBrain/
 ├── backend/
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       └── resources/
-│   │           └── db/
-│   │               └── migration/
-│   ├── pom.xml
-│   └── README.md
+│   ├── app/
+│   │   ├── api/
+│   │   ├── core/
+│   │   ├── llm/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   └── services/
+│   ├── tests/
+│   └── Dockerfile
 │
 ├── frontend/
 │   ├── src/
-│   ├── public/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── lib/
+│   │   └── types/
 │   ├── package.json
-│   └── vite.config.ts
+│   └── Dockerfile
 │
-├── docker-compose.yml
-├── .env.example
-└── .gitignore
-Security
+└── docker-compose.yml
+Authentication
 
-The project follows several security practices:
+GitBrain uses JWT-based authentication to protect API resources.
 
-Passwords are stored as secure hashes rather than plaintext.
-JWT authentication protects secured APIs.
-Role-based authorization separates users and administrators.
-Donor ownership is validated before donation creation.
-Razorpay signatures are verified server-side.
-Webhook requests require signature validation.
-Database schema changes are managed through Flyway.
-Sensitive environment variables are excluded from version control.
+The authentication flow includes:
+
+User registration
+User login
+Access tokens
+Protected API endpoints
+Current-user validation
+Role-based access control
+Chat
+
+Each repository can have its own chat sessions.
+
+Users can:
+
+Create a new chat
+Ask questions about the repository
+View previous messages
+Rename conversations
+Pin conversations
+Delete conversations
+View retrieved source references
+Testing
+
+Backend tests:
+ pytest
+
+Frontend type checking:
+
+npx tsc --noEmit
+
+SSE parser tests:
+
+npx tsx src/lib/sse-parser.test.ts
 Future Improvements
-Production Razorpay configuration
+Semantic/vector search for improved retrieval
+File explorer
+Code dependency graphs
+Improved repository indexing
+Multiple LLM provider support
+Background indexing jobs
 Production deployment
-Automated unit and integration test coverage
-Enhanced admin dashboard functionality
-Donation receipts and email notifications
-Improved monitoring and logging
+Advanced code navigation
+Improved source citations
 License
 
-This project was developed for Sri Balaganapathi Seva Mandali as a temple donation management application.
+This project is currently intended for educational and development purposes.
+
+
+**GitHub repository description:**
+
+`AI-powered codebase assistant for understanding, searching, and chatting with GitHub repositories using R
